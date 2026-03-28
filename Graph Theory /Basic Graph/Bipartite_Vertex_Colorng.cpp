@@ -1,56 +1,54 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-template <typename T = int> struct Graph {
-  int n;
-  bool directed;
-  vector<vector<array<T, 2>>> adj; // adj[u] = {{to, weight}, ...}
-  vector<array<int, 2>> edges;     // edges[id] = {frm, to}
-  Graph(int n, bool dir = false) : n(n), adj(n), directed(dir) {}
-  void addEdge(int u, int v, T w = 1) {
-    edges.push_back({u, v});
-    adj[u].push_back({v, w});
-    if (!directed) {
-      adj[v].push_back({u, w});
-    }
-  }
-};
-
-// Bipartite vertex coloring using BFS
+// Bipartite Vertex Coloring using BFS
 // Time: O(V + E)
-// Returns empty if graph is not bipartite
-
-template <typename GT> vector<int> bipartite_vertex_coloring(GT &G) {
-  assert(!G.directed);
-
-  vector<int> color(G.n, -1);
-  bool ok = true;
-
-  for (int s = 0; s < G.n; s++) {
-    if (color[s] != -1) {
-      continue;
-    }
-    queue<int> q;
-    q.push(s);
-    color[s] = 0;
-    while (!q.empty()) {
-      int v = q.front();
-      q.pop();
-      for (auto &[to, w] : G.adj[v]) {
-        if (color[to] == color[v]) {
-          ok = false;
-          break;
+// Returns color[v] = 0 or 1 for each node
+// Returns empty vector if graph is not bipartite
+// G[v] = list of neighbors (unweighted adjacency list)
+template<typename GT>
+vector<int> bipartite_vertex_coloring(GT& G) {
+    int n = (int)G.size();
+    vector<int> color(n, -1);
+    for (int s = 0; s < n; s++) {
+        if (color[s] != -1) { continue; }
+        queue<int> q;
+        q.push(s);
+        color[s] = 0;
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            for (int to : G[v]) {
+                if (color[to] == color[v]) { return {}; }
+                if (color[to] == -1) {
+                    color[to] = 1 - color[v];
+                    q.push(to);
+                }
+            }
         }
-        if (color[to] == -1) {
-          color[to] = 1 - color[v];
-          q.push(to);
-        }
-      }
     }
-  }
+    return color;
+}
 
-  if (!ok) {
-    return {};
-  }
-  return color;
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    vector<vector<int>> G(n);
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+        G[u].push_back(v);
+        G[v].push_back(u);
+    }
+
+    auto color = bipartite_vertex_coloring(G);
+
+    if (color.empty()) {
+        cout << "Graph is not bipartite\n";
+    } else {
+        for (int i = 0; i < n; i++) {
+            cout << "color[" << i << "] = " << color[i] << "\n";
+        }
+    }
 }
