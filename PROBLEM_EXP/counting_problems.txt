@@ -1,0 +1,108 @@
+(1) Get hints from Contraints
+    n ≤ 20          → Bitmask DP / brute force
+    n ≤ 400         → O(n^3) DP
+    n ≤ 10^3        → O(n^2) DP
+    n ≤ 10^5        → O(n log n) or O(n) DP
+    n ≤ 10^18       → Math formula / matrix expo / digit dp
+
+    on sequence structure    →    DP
+    on sum / count           →    DP
+    on "forbidden patterns"  →    DP (or matrix exponentiation)
+    on symmetry/rotations    →    Burnside's lemma
+    on divisibility/coprime  →    Mobius / inclusion-exclusion
+    on "none of these"       →    Inclusion-exclusion
+    on arrangements of sets  →    PIE or combinatorics formula
+    1. Sequence Structure → DP
+
+    Climbing Stairs — count ways to reach step n taking 1 or 2 steps
+    dp[i] = dp[i-1] + dp[i-2]
+    AtCoder DP-A
+
+    2. Sum / Count → DP
+    Coin Change — count ways to make sum S using given coins
+    dp[s] += dp[s - coin[i]]
+    AtCoder DP-I
+
+    3. Forbidden Patterns → Matrix Expo
+    Count binary strings of length n with no two consecutive 1s, but n up to 10^18
+    [dp[i][0]]   [1 1] ^ n   [1]
+    [dp[i][1]] = [1 0]     * [0]
+    CF 1117D
+
+    4. Symmetry → Burnside
+    Count distinct necklaces of n beads with k colors
+    answer = (1/|G|) * sum of fixed points under each rotation
+    CF 背景 — standard necklace problem
+
+    5. Divisibility / Coprime → Mobius / Totient
+    Count integers in [1, n] coprime to m
+    answer = n * product(1 - 1/p) for each prime p dividing m
+    CF 300E
+
+    6. None of these → Inclusion-Exclusion
+    Derangements — count permutations where NO element is at its own index
+    D(n) = (n-1) * (D(n-1) + D(n-2))
+    CF 888D
+
+    7. Arrangements of Sets → PIE / Combinatorics
+    Distribute n identical balls into k distinct boxes
+    answer = C(n + k - 1, k - 1)   // stars and bars
+    AtCoder DP-J
+
+(2) Ask these questions in order
+    Q1. Is there ANY constraint?
+        NO  → pure combinatorics (nCr, permutation, stars & bars)
+        YES → go to Q2
+
+    Q2. Is the constraint LOCAL?
+        (depends on adjacent/nearby elements, current position, running sum)
+        YES → DP
+        NO  → go to Q3
+
+    Q3. Is the constraint about "forbidden" global patterns?
+        (no element = its index, no two same, etc.)
+        YES → Inclusion-Exclusion
+        NO  → go to Q4
+
+    Q4. Is there symmetry? (rotations, reflections count same)
+        YES → Burnside's Lemma
+        NO  → go to Q5
+
+    Q5. Is it about divisibility / coprimality?
+        YES → Mobius / Euler totient
+        NO  → Digit DP (if counting integers in range)
+
+(3)
+    Q1. Method Selection Framework for Counting Problems
+
+    Question                                                                          | Method
+    ------------------------------------------------------------                      |-------------------------
+    Arrange n distinct items?                                                         | n!
+    Choose k from n, no repetition, order matters?                                    | P(n,k)
+    Choose k from n, no repetition, order doesn't matter?                             | C(n,k)
+    Choose k from n types, repetition allowed, order doesn't matter?                  | Stars & Bars C(k+n-1, n-1)
+    Arrange k from n types, repetition allowed, order matters?                        | n^k
+
+    Q2. If DP, build the state
+        Ask: "what info do I need to make the next decision?"
+
+        Famous Question: Building a Sequence maintaing a contraints
+        Common states:
+        dp[i]          → position/length only
+        dp[i][j]       → position + one constraint (sum, count, last element)
+        dp[i][j][tight] → digit DP
+        dp[mask]       → subset of elements used
+        dp[i][j][k]    → rare, usually O(n^3)
+
+        LOCAL = to decide the next step, a small summary of the past is enough (last element, running sum, current count).
+        GLOBAL = you need to know the entire sequence history to check the constraint (which indices were used, which values appeared, etc.).
+
+
+        Ask: "what was the LAST choice made?"
+        → enumerate all valid last choices
+        → sum over them
+
+        Step 6 — Check if answer needs extra work
+        Single query?    → dp[n] directly
+        Range [a, b]?   → prefix sum: pre[b] - pre[a-1]
+        Multiple tests?  → precompute everything

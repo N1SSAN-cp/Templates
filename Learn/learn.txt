@@ -1,0 +1,109 @@
+I have a complex problem. I want to understand it deeply by breaking it down.
+
+Problem:
+[PASTE PROBLEM HERE]
+
+Do this step by step:
+
+─────────────────────────────────────────
+STEP 1 — IDENTIFY THE CORE TECHNIQUE
+─────────────────────────────────────────
+- What is the fundamental technique/data structure needed?
+- What is the simplest version of this technique?
+- What standard problem does this reduce to?
+
+─────────────────────────────────────────
+STEP 2 — THE SKELETON PROBLEM
+─────────────────────────────────────────
+Strip everything complex away.
+Give me the bare minimum problem that:
+  * uses the same core technique
+  * has the same structure
+  * is easy enough to understand in isolation
+
+State it as a clean problem statement with
+a small example.
+
+─────────────────────────────────────────
+STEP 3 — LEARN THE SKELETON
+─────────────────────────────────────────
+- Explain the skeleton problem intuitively
+- Show the implementation with comments
+- Trace through the small example step by step
+
+─────────────────────────────────────────
+STEP 4 — BRIDGE BACK TO MAIN PROBLEM
+─────────────────────────────────────────
+Now show exactly what changes from skeleton
+to main problem:
+
+  skeleton concept  →  main problem concept
+  skeleton code     →  main problem code
+
+What is the ONLY new idea added on top of
+the skeleton?
+
+─────────────────────────────────────────
+STEP 5 — GENERAL FORM
+─────────────────────────────────────────
+Abstract this problem into its general form.
+
+- What is the GENERAL version of this problem?
+  (replace specific values/gcds/xor with "entity")
+
+- What is the GENERAL version of the technique?
+  (replace specific operations with abstract steps)
+
+- Fill this template:
+
+  PROBLEM CLASS:
+    Given array a[]. For each query [L, R],
+    count distinct [ENTITY] among all
+    [SCOPE: elements / subarrays / pairs]
+    within [L, R].
+
+  ENTITY DEFINITION:
+    Entity at index i = [WHAT]
+    Entities per index = [1 / O(log?) / O(?)]
+
+  VALID L RANGE per entity:
+    lmost = [HOW TO COMPUTE]
+    rmost = [HOW TO COMPUTE]
+
+  BIT OPERATION:
+    write  →  range_update(lmost, rmost, +1)
+    read   →  point_query(L)
+
+- What future problems fit this general form?
+  Give 2-3 examples.
+
+─────────────────────────────────────────
+STEP 6 — FULL SOLUTION
+─────────────────────────────────────────
+Give the complete implementation of the
+main problem, marking which parts are:
+  [SKELETON]  — same as basic problem
+  [NEW]       — the extra complexity added
+  [GENERAL]   — reusable for future problems
+
+─────────────────────────────────────────
+STEP 7 — KEY TAKEAWAYS
+─────────────────────────────────────────
+Give exactly these four things:
+
+  CORE IDEA (1 sentence):
+    The single insight that makes this work.
+
+  THE TRICK (1-2 lines):
+    The non-obvious step that someone would
+    miss on first attempt.
+
+  GENERAL PATTERN (fill in the blank):
+    "Whenever you see [SIGNAL IN PROBLEM],
+     think [TECHNIQUE], and model each
+     entity as contributing to L range
+     [lmost, rmost]."
+
+  FUTURE PROBLEMS:
+    List 2-3 problems that use the exact
+    same pattern with different entities.

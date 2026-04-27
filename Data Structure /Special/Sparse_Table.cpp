@@ -31,12 +31,12 @@ template <typename T, auto func> struct SparseTable {
 int main() {
   vector<int> a = {3, 1, 4, 1, 5, 9, 2, 6};
 
-  SparseTable<int, [](int x, int y) { return min(x, y); }> st(a);
+//   SparseTable<int, [](int x, int y) { return min(x, y); }> st(a);
 
-  cout << st.query(0, 7) << "\n"; // 1
-  cout << st.query(2, 5) << "\n"; // 1
-  cout << st.query(4, 7) << "\n"; // 2
-  cout << st.query(0, 0) << "\n"; // 3
+//   cout << st.query(0, 7) << "\n"; // 1
+//   cout << st.query(2, 5) << "\n"; // 1
+//   cout << st.query(4, 7) << "\n"; // 2
+//   cout << st.query(0, 0) << "\n"; // 3
 
   return 0;
 }

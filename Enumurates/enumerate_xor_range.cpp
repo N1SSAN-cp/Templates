@@ -4,7 +4,6 @@ using namespace std;
 // Enumerates intervals [L, R) such that (x ^ a) is constant for x in [L, R)
 // Covers full range [lo, hi)
 // Time: O(log(hi))  Space: O(1)
-// Overflow: b = 1LL << k must stay long long; lo, hi, a should be long long if > 2^30
 template <typename F>
 void enumerate_xor_range(long long a, long long lo, long long hi, F query) {
     for (int k = 0; k < 64; ++k) {

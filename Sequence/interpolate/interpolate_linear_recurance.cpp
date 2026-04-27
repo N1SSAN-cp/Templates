@@ -3,6 +3,7 @@ using namespace std;
 
 // Berlekamp-Massey + Kitamasa Linear Recurrence | O(n^2 log k)
 const int MOD = 998244353;
+// f(x)=a1*f(0)+ a2*f(1)+....,
 
 template <int MOD, int RT> struct mint {
   static const int mod = MOD;

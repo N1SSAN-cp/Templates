@@ -5,10 +5,9 @@ using namespace std;
 // find: O(α(n)) | merge: O(α(n))
 struct UnionFind {
   int num, comp;
-  vector<int> comp_size, edge_count, par;
+  vector<int> comp_size, par;
 
-  UnionFind(int n)
-      : num(n), comp(n), comp_size(n, 1), edge_count(n, 0), par(n) {
+  UnionFind(int n) : num(n), comp(n), comp_size(n, 1), par(n) {
     iota(par.begin(), par.end(), 0);
   }
 
@@ -26,14 +25,12 @@ struct UnionFind {
     x = find(x);
     y = find(y);
     if (x == y) {
-      edge_count[x]++;
       return false;
     }
     comp--;
     if (comp_size[x] < comp_size[y]) {
       swap(x, y);
     }
-    edge_count[x] += edge_count[y] + 1;
     comp_size[x] += comp_size[y];
     par[y] = x;
     return true;

@@ -1,9 +1,7 @@
 #include <algorithm>
-#include <array>
 #include <cassert>
 #include <iomanip>
 #include <iostream>
-#include <vector>
 using namespace std;
 
 struct fraction {

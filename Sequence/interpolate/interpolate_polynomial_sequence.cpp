@@ -1,25 +1,25 @@
-// ── Example Problems
-// ──────────────────────────────────────────────────────────
-// 1. Sum of k-th powers: 1^k + 2^k + ... + n^k (mod 998244353)
-//    Input: n=5  k=2  -> 1+4+9+16+25        = 55
-//    Input: n=5  k=3  -> 1+8+27+64+125      = 225
-//    Input: n=100 k=1 -> 1+2+...+100        = 5050
-//    Input: n=1e18 k=0 -> 1+1+...+1 (n times) = n % mod
-//
-// 2. CF 622F - The Sum of the k-th Powers
-//    https://codeforces.com/problemset/problem/622/F
-//    Given n, k. Compute sum of k-th powers modulo 10^9+7.
-//    Constraints: 1 <= n <= 1e9, 0 <= k <= 1e6
-//
-// 3. Any polynomial sum where sample points are 0,1,2,...,k+1
-//    and you need to evaluate at arbitrary large n.
-//    e.g. sum of (i^2 + 3i + 1) for i=1..n:
-//         build pts as prefix sums of (i^2+3i+1), query at n.
-// ─────────────────────────────────────────────────────────────────────────────
 #include <bits/stdc++.h>
 using namespace std;
 
-const int N = 1e6 + 9, mod = 998244353;
+// Finite Difference Test: O(m^2)
+int polynomialDegree(vector<long long> a) {
+  for (int d = 0; d < (int)a.size() - 1; d++) {
+    bool constant = true;
+    for (int i = 0; i < (int)a.size() - 1; i++) {
+      a[i] = a[i + 1] - a[i];
+      if (a[i] != a[0]) {
+        constant = false;
+      }
+    }
+    a.pop_back();
+    if (constant) {
+      return d + 1;
+    }
+  }
+  return -1; // not polynomial within given points
+}
+
+const int N = 1e6 + 9, mod = 1e6 + 3;
 struct base {
   double x, y;
   base() { x = y = 0; }
@@ -38,11 +38,13 @@ vector<int> rev = {0, 1};
 const double PI = acosl(-1.0);
 
 void ensure_base(int p) {
-  if (p <= lim)
+  if (p <= lim) {
     return;
+  }
   rev.resize(1 << p);
-  for (int i = 0; i < (1 << p); i++)
+  for (int i = 0; i < (1 << p); i++) {
     rev[i] = (rev[i >> 1] >> 1) | ((i & 1) << (p - 1));
+  }
   roots.resize(1 << p);
   while (lim < p) {
     double angle = 2 * PI / (1 << (lim + 1));
@@ -54,31 +56,38 @@ void ensure_base(int p) {
     lim++;
   }
 }
+
 void fft(vector<base> &a, int n = -1) {
-  if (n == -1)
+  if (n == -1) {
     n = a.size();
+  }
   assert((n & (n - 1)) == 0);
   int zeros = __builtin_ctz(n);
   ensure_base(zeros);
   int shift = lim - zeros;
-  for (int i = 0; i < n; i++)
-    if (i < (rev[i] >> shift))
+  for (int i = 0; i < n; i++) {
+    if (i < (rev[i] >> shift)) {
       swap(a[i], a[rev[i] >> shift]);
-  for (int k = 1; k < n; k <<= 1)
-    for (int i = 0; i < n; i += 2 * k)
+    }
+  }
+  for (int k = 1; k < n; k <<= 1) {
+    for (int i = 0; i < n; i += 2 * k) {
       for (int j = 0; j < k; j++) {
         base z = a[i + j + k] * roots[j + k];
         a[i + j + k] = a[i + j] - z;
         a[i + j] = a[i + j] + z;
       }
+    }
+  }
 }
 
 // eq=0: 4 FFTs, eq=1: 3 FFTs (squaring)
 vector<int> multiply(vector<int> &a, vector<int> &b, int eq = 0) {
   int need = a.size() + b.size() - 1;
   int p = 0;
-  while ((1 << p) < need)
+  while ((1 << p) < need) {
     p++;
+  }
   ensure_base(p);
   int sz = 1 << p;
   vector<base> A(sz), B(sz);
@@ -87,9 +96,9 @@ vector<int> multiply(vector<int> &a, vector<int> &b, int eq = 0) {
     A[i] = base(x & ((1 << 15) - 1), x >> 15);
   }
   fft(A, sz);
-  if (eq)
+  if (eq) {
     copy(A.begin(), A.begin() + sz, B.begin());
-  else {
+  } else {
     for (int i = 0; i < (int)b.size(); i++) {
       int x = (b[i] % mod + mod) % mod;
       B[i] = base(x & ((1 << 15) - 1), x >> 15);
@@ -121,78 +130,99 @@ vector<int> multiply(vector<int> &a, vector<int> &b, int eq = 0) {
   return res;
 }
 
-template <int32_t MOD> struct modint {
-  int32_t value;
-  modint() = default;
-  modint(int32_t value_) : value(value_) {}
-  inline modint<MOD> operator+(modint<MOD> o) const {
-    int32_t c = value + o.value;
-    return c >= MOD ? c - MOD : c;
-  }
-  inline modint<MOD> operator-(modint<MOD> o) const {
-    int32_t c = value - o.value;
-    return c < 0 ? c + MOD : c;
-  }
-  inline modint<MOD> operator*(modint<MOD> o) const {
-    int32_t c = (int64_t)value * o.value % MOD;
-    return c < 0 ? c + MOD : c;
-  }
-  inline modint<MOD> &operator+=(modint<MOD> o) {
-    value += o.value;
-    if (value >= MOD)
-      value -= MOD;
-    return *this;
-  }
-  inline modint<MOD> &operator-=(modint<MOD> o) {
-    value -= o.value;
-    if (value < 0)
-      value += MOD;
-    return *this;
-  }
-  inline modint<MOD> &operator*=(modint<MOD> o) {
-    value = (int64_t)value * o.value % MOD;
-    if (value < 0)
-      value += MOD;
-    return *this;
-  }
-  inline modint<MOD> operator-() const { return value ? MOD - value : 0; }
-  modint<MOD> pow(uint64_t k) const {
-    modint<MOD> x = *this, y = 1;
-    for (; k; k >>= 1) {
-      if (k & 1)
-        y *= x;
-      x *= x;
-    }
-    return y;
-  }
-  modint<MOD> inv() const { return pow(MOD - 2); }
-  inline modint<MOD> operator/(modint<MOD> o) const { return *this * o.inv(); }
-  inline modint<MOD> &operator/=(modint<MOD> o) { return *this *= o.inv(); }
-  inline bool operator==(modint<MOD> o) const { return value == o.value; }
-  inline bool operator!=(modint<MOD> o) const { return value != o.value; }
-  inline bool operator<(modint<MOD> o) const { return value < o.value; }
-  inline bool operator>(modint<MOD> o) const { return value > o.value; }
-};
-template <int32_t MOD> modint<MOD> operator*(int64_t v, modint<MOD> n) {
-  return modint<MOD>(v) * n;
-}
-template <int32_t MOD> modint<MOD> operator*(int32_t v, modint<MOD> n) {
-  return modint<MOD>(v % MOD) * n;
-}
-template <int32_t MOD> ostream &operator<<(ostream &out, modint<MOD> n) {
-  return out << n.value;
-}
-using mint = modint<mod>;
+template <int MOD, int RT> struct ModInt {
+  static_assert(MOD > 1 && MOD < (1 << 30));
+  static constexpr int mod = MOD;
+  static constexpr ModInt rt() { return RT; }
 
-// ── Combinatorics
+  unsigned int v;
+
+  ModInt() : v(0) {}
+  template <typename T> ModInt(T _v) : v(((long long)_v % MOD + MOD) % MOD) {}
+
+  static ModInt raw(int _v) {
+    ModInt x;
+    x.v = _v;
+    return x;
+  }
+
+  explicit operator int() const { return v; }
+  explicit operator long long() const { return v; }
+
+  bool operator==(ModInt o) const { return v == o.v; }
+  bool operator!=(ModInt o) const { return v != o.v; }
+
+  ModInt &operator+=(ModInt o) {
+    if ((v += o.v) >= (unsigned)MOD) {
+      v -= MOD;
+    }
+    return *this;
+  }
+  ModInt &operator-=(ModInt o) {
+    if ((int)(v -= o.v) < 0) {
+      v += MOD;
+    }
+    return *this;
+  }
+  ModInt &operator*=(ModInt o) {
+    v = (long long)v * o.v % MOD;
+    return *this;
+  }
+  ModInt &operator/=(ModInt o) { return *this *= inv(o); }
+
+  friend ModInt operator+(ModInt a, ModInt b) { return a += b; }
+  friend ModInt operator-(ModInt a, ModInt b) { return a -= b; }
+  friend ModInt operator*(ModInt a, ModInt b) { return a *= b; }
+  friend ModInt operator/(ModInt a, ModInt b) { return a /= b; }
+  friend ModInt operator-(ModInt a) { return ModInt(MOD - a.v); }
+
+  friend ModInt pow(ModInt a, long long p) {
+    ModInt res = 1;
+    for (; p > 0; p >>= 1, a *= a) {
+      if (p & 1) {
+        res *= a;
+      }
+    }
+    return res;
+  }
+  friend ModInt inv(ModInt a) {
+    assert(a.v != 0);
+    int x = 1, y = 0, m = MOD, n = a.v;
+    while (n > 1) {
+      int q = m / n;
+      m -= q * n;
+      swap(m, n);
+      y -= q * x;
+      swap(x, y);
+    }
+    return ModInt(x);
+  }
+
+  struct Hash {
+    size_t operator()(ModInt a) const { return hash<int>{}(a.v); }
+  };
+
+  friend ostream &operator<<(ostream &os, ModInt a) { return os << a.v; }
+  friend istream &operator>>(istream &is, ModInt &a) {
+    long long _v;
+    is >> _v;
+    a = ModInt(_v);
+    return is;
+  }
+};
+
+using mint = ModInt<mod, 3>;
+
+// Combinatorics
 struct combi {
   int n;
   vector<mint> facts, finvs, invs;
   combi(int _n) : n(_n), facts(_n), finvs(_n), invs(_n) {
     facts[0] = finvs[0] = 1;
     invs[1] = 1;
-    for (int i = 2; i < n; i++)
+    for (int i = 2; i < n; i++) {
       invs[i] = invs[mod % i] * (-mod / i);
+    }
     for (int i = 1; i < n; i++) {
       facts[i] = facts[i - 1] * i;
       finvs[i] = finvs[i - 1] * invs[i];
@@ -200,36 +230,44 @@ struct combi {
   }
   mint fact(int n) { return facts[n]; }
   mint finv(int n) { return finvs[n]; }
-  mint inv(int n) { return invs[n]; }
+  mint inv_val(int n) { return invs[n]; }
   mint ncr(int n, int k) { return facts[n] * finvs[k] * finvs[n - k]; }
 } C(N);
 
-// ── Polynomial helpers
+// Polynomial helpers
 vector<mint> multiply_mint(vector<mint> &a, vector<mint> &b) {
   vector<int> A, B;
-  for (auto x : a)
-    A.push_back(x.value);
-  for (auto x : b)
-    B.push_back(x.value);
+  for (auto x : a) {
+    A.push_back(x.v);
+  }
+  for (auto x : b) {
+    B.push_back(x.v);
+  }
   auto res = multiply(A, B, A == B);
   vector<mint> ans;
-  for (auto x : res)
+  for (auto x : res) {
     ans.push_back(mint(x));
-  while (ans.size() && ans.back() == 0)
+  }
+  while (ans.size() && ans.back() == 0) {
     ans.pop_back();
+  }
   return ans;
 }
+
 vector<mint> add(vector<mint> a, vector<mint> b) {
   int n = max(a.size(), b.size());
   vector<mint> ans(n);
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < n; i++) {
     ans[i] = (i < (int)a.size() ? a[i] : 0) + (i < (int)b.size() ? b[i] : 0);
-  while (ans.size() && ans.back() == 0)
+  }
+  while (ans.size() && ans.back() == 0) {
     ans.pop_back();
+  }
   return ans;
 }
 
 vector<mint> t[N * 4];
+
 void build(int id, int l, int r) {
   if (l == r) {
     t[id] = {-l, 1};
@@ -240,6 +278,7 @@ void build(int id, int l, int r) {
   build(id << 1 | 1, mid + 1, r);
   t[id] = multiply_mint(t[id << 1], t[id << 1 | 1]);
 }
+
 vector<mint> yo(int id, int l, int r, vector<mint> &p) {
   if (l == r) {
     int n = (int)p.size() - 1;
@@ -251,6 +290,7 @@ vector<mint> yo(int id, int l, int r, vector<mint> &p) {
   auto R = yo(id << 1 | 1, mid + 1, r, p);
   return add(multiply_mint(L, t[id << 1 | 1]), multiply_mint(t[id << 1], R));
 }
+
 vector<mint> Lagrange(vector<mint> &p) {
   int n = p.size();
   build(1, 0, n - 1);
@@ -259,7 +299,7 @@ vector<mint> Lagrange(vector<mint> &p) {
   return ans;
 }
 
-// ── Polynomial_Sequence
+// Polynomial_Sequence
 struct Polynomial_Sequence {
   vector<mint> coeffs;
   Polynomial_Sequence(vector<mint> pts) { coeffs = Lagrange(pts); }
@@ -280,7 +320,7 @@ int main() {
   mint sum = 0;
   pts.push_back(0);
   for (int i = 1; i <= k + 1; i++) {
-    sum += mint(i).pow(k);
+    sum += pow(mint(i), k);
     pts.push_back(sum);
   }
   Polynomial_Sequence pes(pts);
